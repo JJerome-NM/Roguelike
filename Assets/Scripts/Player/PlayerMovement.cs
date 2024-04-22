@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -8,11 +10,17 @@ namespace Player
     {
         private static readonly string[] LoopedAnimations = { "Run", "Walk", "Stunned" };
         private static readonly string[] SimpleAnimations = { "Attack", "Boost", "Death", "GetHit" };
-        
+        private static readonly Dictionary<string, float> AnimationsTime = new ()
+        {
+            { "Attack", 10f },
+            { "Boost", 10f },
+            { "Death", 10f },
+            { "GetHit", 10f }
+        };
+
         [Header("Settings")] 
-        [SerializeField] private float moveSpeed = 10;
-        [SerializeField] private Transform orientation;
-        
+        [SerializeField] private float walkSpeed = 1;
+        [SerializeField] private float runSpeed = 4;
         
         private Animator _animator;
         private Rigidbody2D _rb;
@@ -22,42 +30,83 @@ namespace Player
         private float _horizontalInput;
         private Vector2 _moveDirection;
         private string _currentAnimation = string.Empty;
-
+        private bool _canMove = true;
+        
         private void Start()
         {
             _animator = GetComponent<Animator>();
             _rb = GetComponent<Rigidbody2D>();
+
+            GetAnimationsTime();
         }
 
+        private void GetAnimationsTime()
+        {
+            AnimationClip[] clips = _animator.runtimeAnimatorController.animationClips;
+ 
+            foreach (AnimationClip clip in clips)
+            {
+                if (AnimationsTime.ContainsKey(clip.name))
+                {
+                    AnimationsTime[clip.name] = clip.length;
+                }
+            }
+        }
+        
         private void Update()
         {
             MovementInput();
-            
-            if (Input.GetKey(KeyCode.Mouse0))
-            {
-                SelectSimpleAnimation("Attack");
-            }
-
-            SelectAnimation();
+            SelectLoopedAnimation();
         }
 
         private void MovementInput()
         {
+            if (!_canMove)
+            {
+                _rb.velocity = new Vector2(0, 0);
+                return;
+            }
+            
             _verticalInput = Input.GetAxisRaw("Vertical");
             _horizontalInput = Input.GetAxisRaw("Horizontal");
             
             _moveDirection = new Vector2(_horizontalInput, _verticalInput);
             
-            _rb.velocity = _moveDirection * moveSpeed;
+            _rb.velocity = _moveDirection.normalized * GetCurrentMaxSpeed();
 
             if (_horizontalInput != 0 || _verticalInput != 0)
             {
-                _animator.SetFloat("Vertical", _rb.velocity.y);
-                _animator.SetFloat("Horizontal", _rb.velocity.x);
+                SetCharacterDirection(_rb.velocity);
             }
         }
+
+        private float GetCurrentMaxSpeed()
+        {
+            return Input.GetKey(KeyCode.LeftControl) ? runSpeed : walkSpeed;
+        }
         
-        private void SelectSimpleAnimation(string anim)
+        public void SetCharacterDirection(Vector2 direction)
+        {
+            _animator.SetFloat("Vertical", direction.y);
+            _animator.SetFloat("Horizontal", direction.x);
+        }
+        
+        public void Attack(Action afterAnimationAction) => DoSAnimation("Attack", afterAnimationAction);
+
+        public void GetHit(Action afterAnimationAction) => DoSAnimation("GetHit", afterAnimationAction);
+        
+        private void DoSAnimation(string animationName, Action afterAnimationAction)
+        {
+            _canMove = false;
+            
+            SelectSimpleAnimation(animationName, () =>
+            {
+                _canMove = true;
+                afterAnimationAction();
+            });
+        }
+        
+        private void SelectSimpleAnimation(string anim, Action afterAnimationAction)
         {
             if (SimpleAnimations.Contains(anim))
             {
@@ -69,20 +118,19 @@ namespace Player
                 
                 _currentAnimation = anim;
                 _animator.Play(_currentAnimation);
-                _animationCoroutine = StartCoroutine(ResetCurrentSimpleAnimation(_currentAnimation));
+                _animationCoroutine = StartCoroutine(ResetSimpleAnimation(_currentAnimation, afterAnimationAction));
             }
         }
 
-        private IEnumerator ResetCurrentSimpleAnimation(string anim)
+        private IEnumerator ResetSimpleAnimation(string anim, Action afterAnimationAction)
         {
-            while (_animator.GetCurrentAnimatorStateInfo(0).IsName(anim))
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
+            yield return new WaitForSeconds(AnimationsTime[anim]);
+
             _currentAnimation = string.Empty;
+            afterAnimationAction();
         }        
         
-        private void SelectAnimation()
+        private void SelectLoopedAnimation()
         {
             if (SimpleAnimations.Contains(_currentAnimation)) return;
             
@@ -98,10 +146,12 @@ namespace Player
                 return;
             }
 
-            _currentAnimation = magnitude < 1 ? "Walk" : "Run";
-            _animator.SetBool(_currentAnimation, true);
-            _animator.Play(_currentAnimation);
+            _currentAnimation = magnitude <= walkSpeed ? "Walk" : "Run";
+            if (LoopedAnimations.Contains(_currentAnimation))
+            {
+                _animator.SetBool(_currentAnimation, true);
+                _animator.Play(_currentAnimation);
+            }
         }
-
     }
 }
