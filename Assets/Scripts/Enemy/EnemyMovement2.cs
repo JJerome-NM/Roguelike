@@ -2,12 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DefaultNamespace;
 using UnityEngine;
 
-namespace Player
+namespace Enemy
 {
-    public class PlayerMovement : MonoBehaviour
+    public class EnemyMovement2 : MonoBehaviour
     {
         private static readonly string[] LoopedAnimations = { "Run", "Walk", "Stunned" };
         private static readonly string[] SimpleAnimations = { "Attack", "Boost", "Death", "GetHit" };
@@ -56,12 +55,10 @@ namespace Player
         
         private void Update()
         {
-            if (GlobalStateManager.IsGameStopped) return;
-            
             MovementInput();
             SelectLoopedAnimation();
         }
-        
+
         private void MovementInput()
         {
             if (!_canMove)
@@ -69,9 +66,6 @@ namespace Player
                 _rb.velocity = new Vector2(0, 0);
                 return;
             }
-            
-            _verticalInput = Input.GetAxisRaw("Vertical");
-            _horizontalInput = Input.GetAxisRaw("Horizontal");
             
             _moveDirection = new Vector2(_horizontalInput, _verticalInput);
             
