@@ -16,16 +16,39 @@ namespace Player
         [SerializeField] private LayerMask enemyLayer;
         [SerializeField] private LayerMask interactable;
         [SerializeField] private PlayerInventory _inventory;
+        [SerializeField] private float startHeals = 100;
         
         [Header("Other")] 
         [SerializeField] private NotificationController _notification;
         
         private PlayerMovement _playerMovement;
         private bool _performsAction = false;
+
+        private float _heals = 100;
+
+        private void Awake()
+        {
+            GlobalEventManager.OnGameStarted.AddListener(OnGameStarted);
+            GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
+        }
+
+        private void OnGameStarted(GameStartState state)
+        {
+            if (state != GameStartState.Resume)
+            {
+                _heals = startHeals;
+            }
+        }
+
+        private void OnGameStopped(GameEndState state)
+        {
+            
+        }
         
         private void Start()
         {
             _playerMovement = GetComponent<PlayerMovement>();
+            _heals = startHeals;
         }
 
         private void Update()
@@ -131,6 +154,21 @@ namespace Player
         {
             Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             return new Vector3(position.x, position.y, 0);
+        }
+        
+        public void TakeDamage(GameObject attacker, float damage)
+        {
+            if (attacker.gameObject.GetComponent<EnemyAi>() != null)
+            {
+                _heals -= damage;
+
+                Debug.Log(_heals);
+                
+                if (_heals < 0)
+                {
+                    GlobalEventManager.StopGame(GameEndState.PlayerDied);
+                }
+            }
         }
     }
 }
