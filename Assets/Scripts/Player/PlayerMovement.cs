@@ -32,13 +32,35 @@ namespace Player
         private Vector2 _moveDirection;
         private string _currentAnimation = string.Empty;
         private bool _canMove = true;
-        
-        private void Start()
+
+        private void Awake()
         {
             _animator = GetComponent<Animator>();
             _rb = GetComponent<Rigidbody2D>();
 
             GetAnimationsTime();
+            
+            GlobalEventManager.OnGameStarted.AddListener(OnGameStarted);
+            GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
+        }
+
+        private void OnGameStarted(GameStartState state)
+        {
+            
+        }
+
+        private void OnGameStopped(GameEndState state)
+        {
+            _moveDirection = new Vector2(0, 0);
+            _rb.velocity = _moveDirection;
+            
+            SetCharacterDirection(_rb.velocity);
+            
+            if (!string.IsNullOrWhiteSpace(_currentAnimation))
+            {
+                _animator.SetBool(_currentAnimation, false);
+            }
+            _currentAnimation = string.Empty;
         }
 
         private void GetAnimationsTime()
@@ -93,7 +115,15 @@ namespace Player
         
         public void Attack(Action afterAnimationAction) => DoSAnimation("Attack", afterAnimationAction);
 
-        public void GetHit(Action afterAnimationAction) => DoSAnimation("GetHit", afterAnimationAction);
+        // public void GetHit(Action afterAnimationAction) => DoSAnimation("GetHit", afterAnimationAction);
+        public void GetHit()
+        {
+            if (_currentAnimation != String.Empty) return;
+            
+            _currentAnimation = "GetHit";
+            _animator.Play(_currentAnimation);
+            _animationCoroutine = StartCoroutine(ResetSimpleAnimation(_currentAnimation, () => {}));
+        }
         
         private void DoSAnimation(string animationName, Action afterAnimationAction)
         {

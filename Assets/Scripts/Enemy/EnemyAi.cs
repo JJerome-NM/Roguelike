@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using DefaultNamespace;
+using Levels;
 using Player;
 using UnityEngine;
 using UnityEngine.AI;
@@ -10,46 +11,60 @@ namespace Enemy
     {
         [SerializeField] private GameObject player;
         [SerializeField] private LayerMask playerLayer;
-
+        
         [Header("Search")] 
         [SerializeField] private float searchDistance;
         [SerializeField] private float chaseDistance;
         [SerializeField] private float searchDelay;
         [SerializeField] private float chaseDelay;
-
+        
         [Header("Interaction")] 
-        [SerializeField] private float hitDistance;
-        [SerializeField] private float demage;
-
+        [SerializeField] private float attackDistance = 1.5f;
+        [SerializeField] private float hitDistance = 2f;
+        [SerializeField] private float damage = 25;
+        
         [Header("Animation")] 
         [SerializeField] private float updateAnimationDelay = 0.05f;
         
         private PlayerActionsController _playerAC;
         private NavMeshAgent _navAgent;
-
+        
         private Coroutine _searchCoroutine;
         private Coroutine _chaseCoroutine;
         private Coroutine _updateAnimationCoroutine;
         private SkeletonAnimationController _animation;
         private Vector3 _startPosition;
-
+        
         private void Awake()
         {
-            _playerAC = player.GetComponent<PlayerActionsController>();
+            if (player != null)
+            {
+                _playerAC = player.GetComponent<PlayerActionsController>();
+            }
             _navAgent = GetComponent<NavMeshAgent>();
             _animation = GetComponent<SkeletonAnimationController>();
             _startPosition = transform.position;
-
+        
             GlobalEventManager.OnGameStarted.AddListener(OnGameStart);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
+            LevelsEventManager.OnLevelMultiplayerUpdated.AddListener((multiplayer) =>
+            {
+                damage += multiplayer;
+            });
         }
-
+        
+        public void InitPlayer(GameObject p)
+        {
+            player = p;
+            _playerAC = player.GetComponent<PlayerActionsController>();
+        }
+        
         private void OnGameStart(GameStartState state)
         {
             StartSearch();
             StartUpdateAnimation();
         }
-
+        
         private void OnGameStopped(GameEndState state)
         {
             StopChase();
@@ -57,12 +72,15 @@ namespace Enemy
             
             if (state != GameEndState.Pause)
             {
-                Debug.Log("dfdfdf");
                 _navAgent.SetDestination(_startPosition);
-                // transform.position = _startPosition;
+                transform.position = _startPosition;
+            }
+            else
+            {
+                _navAgent.SetDestination(transform.position);
             }
         }
-
+        
         private IEnumerator UpdateAnimations()
         {
             while (true)
@@ -81,70 +99,94 @@ namespace Enemy
         {
             while (true)
             {
-                Debug.Log("Search");
-                
                 if (_navAgent.velocity.magnitude != 0)
                 {
                     StartUpdateAnimation();
                 }
                 
                 var distanceTopPlayer = Vector3.Distance(transform.position, player.transform.position);
-
                 if (distanceTopPlayer < searchDistance)
                 {
                     StopSearch();
                     StartChase();
                 }
-
+        
                 yield return new WaitForSeconds(searchDelay);
             }
         }
-
+        
         private IEnumerator ChasePlayer()
         {
             while (true)
             {
-                Debug.Log("Chase");
-                var distanceTopPlayer = Vector3.Distance(transform.position, player.transform.position);
-
-                if (distanceTopPlayer < chaseDistance)
+                if (_animation.canMove)
                 {
-                    _navAgent.SetDestination(player.transform.position);
-                    StartUpdateAnimation();
-
-                    if (distanceTopPlayer < hitDistance)
+                    var distanceTopPlayer = Vector3.Distance(transform.position, player.transform.position);
+        
+                    if (distanceTopPlayer < chaseDistance)
                     {
-                        _playerAC.TakeDamage(gameObject, demage);
+                        if (distanceTopPlayer < attackDistance)
+                        {
+                            AttackPlayer();
+                        }
+                        else
+                        {
+                            _navAgent.SetDestination(player.transform.position);
+                            StartUpdateAnimation();
+                        }
                     }
+                    else
+                    {
+                        _navAgent.SetDestination(_startPosition);
+                        StopChase();
+                        StartSearch();
+                    }
+        
                 }
-                else
-                {
-                    _navAgent.SetDestination(_startPosition);
-                    StopChase();
-                    StartSearch();
-                }
-
                 yield return new WaitForSeconds(chaseDelay);
             }
         }
-
+        
+        private void AttackPlayer()
+        {
+            StopUpdateAnimation();
+            SetPlayerDirection();
+                        
+            _navAgent.SetDestination(transform.position);
+            _animation.Attack(() =>
+            {
+                var distanceTopPlayer = Vector3.Distance(transform.position, player.transform.position);
+        
+                if (distanceTopPlayer < hitDistance)
+                {
+                    SetPlayerDirection();
+                    _playerAC.TakeDamage(gameObject, damage);
+                }
+            });
+        }
+        
         private void SetAnimationMoveDirection()
         {
             _animation.SetCharacterDirection(GetMoveDirection(transform.position, _navAgent.steeringTarget)); 
         }
-
+        
+        private void SetPlayerDirection()
+        {
+            _animation.SetCharacterDirection(GetMoveDirection(transform.position, player.transform.position));
+        }
+        
         private void StartUpdateAnimation() => _updateAnimationCoroutine ??= StartCoroutine(UpdateAnimations());
-
+        
         private void StopUpdateAnimation() => StopMyCoroutine(ref _updateAnimationCoroutine);
         
         private void StartChase() => _chaseCoroutine ??= StartCoroutine(ChasePlayer());
-
+        
         private void StopChase() => StopMyCoroutine(ref _chaseCoroutine);
         
         private void StartSearch() => _searchCoroutine ??= StartCoroutine(SearchPlayer());
-
+        
         private void StopSearch() => StopMyCoroutine(ref _searchCoroutine);
-
+        
         private void StopMyCoroutine(ref Coroutine coroutine)
         {
             if (coroutine != null)

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DefaultNamespace;
+using UnityEngine;
 
 namespace InteractObjects
 {
@@ -7,6 +8,18 @@ namespace InteractObjects
         [SerializeField] private GameObject glow;
 
         private bool _isCollected = false;
+
+        private void Awake()
+        {
+            GlobalEventManager.OnGameStarted.AddListener((state) =>
+            {
+                if (state != GameStartState.Resume)
+                {
+                    glow.SetActive(false);
+                    _isCollected = false;
+                }
+            });
+        }
 
         public void Interact()
         {

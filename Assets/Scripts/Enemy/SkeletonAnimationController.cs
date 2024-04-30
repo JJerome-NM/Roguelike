@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 
 namespace Enemy
 {
@@ -27,7 +28,7 @@ namespace Enemy
         private Vector2 _moveDirection;
         
         private string _currentAnimation = string.Empty;
-        private bool _canMove = true;
+        public bool canMove { get; private set; } = true;
 
         private void Awake()
         {
@@ -70,11 +71,11 @@ namespace Enemy
         
         private void DoSAnimation(string animationName, Action afterAnimationAction)
         {
-            _canMove = false;
+            canMove = false;
             
             SelectSimpleAnimation(animationName, () =>
             {
-                _canMove = true;
+                canMove = true;
                 afterAnimationAction();
             });
         }

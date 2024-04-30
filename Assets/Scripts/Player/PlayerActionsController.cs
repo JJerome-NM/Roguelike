@@ -17,17 +17,26 @@ namespace Player
         [SerializeField] private LayerMask interactable;
         [SerializeField] private PlayerInventory _inventory;
         [SerializeField] private float startHeals = 100;
-        
+
         [Header("Other")] 
         [SerializeField] private NotificationController _notification;
-        
+
         private PlayerMovement _playerMovement;
         private bool _performsAction = false;
-
         private float _heals = 100;
 
+        private Vector3 _startPosition;
+        private LayerMask _startLayer;
+        private string _startLayerName;
+        
         private void Awake()
         {
+            _playerMovement = GetComponent<PlayerMovement>();
+            _startPosition = transform.position;
+            _startLayer = gameObject.layer;
+            _startLayerName = LayerMask.LayerToName(_startLayer);
+            _heals = startHeals;
+            
             GlobalEventManager.OnGameStarted.AddListener(OnGameStarted);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
         }
@@ -36,15 +45,27 @@ namespace Player
         {
             if (state != GameStartState.Resume)
             {
+                SetLayerToCharacter();
+                gameObject.layer = _startLayer;
+                transform.position = _startPosition;
+                
                 _heals = startHeals;
             }
         }
 
-        private void OnGameStopped(GameEndState state)
+        private void SetLayerToCharacter()
         {
-            
+            SpriteRenderer[] srs = gameObject.GetComponentsInChildren<SpriteRenderer>();
+            foreach ( SpriteRenderer sr in srs)
+            {
+                sr.sortingLayerName = _startLayerName;
+            }
         }
         
+        private void OnGameStopped(GameEndState state)
+        {
+        }
+
         private void Start()
         {
             _playerMovement = GetComponent<PlayerMovement>();
@@ -54,7 +75,7 @@ namespace Player
         private void Update()
         {
             if (_performsAction) return;
-            
+
             if (Input.GetKey(KeyCode.Mouse0))
             {
                 CanIDoSomething(Attack);
@@ -68,36 +89,38 @@ namespace Player
 
         private void CanIDoSomething(Action action)
         {
-            if (_performsAction 
+            if (_performsAction
                 || GlobalStateManager.IsGameStopped
                 || UiInventoryController.IsInventoryOpen) return;
-            
+
             action.Invoke();
         }
-        
+
         private void Attack()
         {
             var cursorPosition = GetCursorWorldPosition();
             var distanceToCursor = Vector3.Distance(transform.position, GetCursorWorldPosition());
-            
+
             if (distanceToCursor > maxHitDistance) return;
 
             _performsAction = true;
             var attackDirection = -(transform.position - cursorPosition).normalized;
             _playerMovement.SetCharacterDirection(attackDirection);
-            
+
             _playerMovement.Attack(() =>
             {
                 var targetCollider = Physics2D.OverlapCircle(cursorPosition, 0.01f, interactable);
 
                 if (targetCollider != null)
                 {
-                    Debug.Log(targetCollider.tag);
-                    
                     switch (targetCollider.tag)
                     {
-                        case "Enemy": AttackEnemy(targetCollider); break;
-                        case "ObstacleField": DestroyTile(targetCollider, cursorPosition); break;
+                        case "Enemy":
+                            AttackEnemy(targetCollider);
+                            break;
+                        case "ObstacleField":
+                            DestroyTile(targetCollider, cursorPosition);
+                            break;
                     }
                 }
 
@@ -110,33 +133,33 @@ namespace Player
             if (enemy != null)
             {
                 var enemyController = enemy.gameObject.GetComponent<EnemyController>();
-                    
+
                 enemyController.Damage(100);
             }
-                
+
             NotificationEventManager.ShowNotification("Hit");
         }
 
         private void DestroyTile(Collider2D collider, Vector3 cursorPosition)
         {
             var fieldController = collider.GetComponentInParent<ObstacleFieldController>();
-            
+
             fieldController.DestroyTile(cursorPosition);
-            
+
             GlobalEventManager.UpdateObstacleFields();
         }
-        
+
         private void Interact()
         {
             var cursorPosition = GetCursorWorldPosition();
             var distanceToCursor = Vector3.Distance(transform.position, GetCursorWorldPosition());
-            
+
             if (distanceToCursor > maxInteractionDistance) return;
 
             var collider = Physics2D.OverlapCircle(cursorPosition, 0.01f, interactable);
 
             if (collider == null) return;
-            
+
             if (collider.gameObject.CompareTag("Rune"))
             {
                 var interactObj = collider.gameObject.GetComponent<RuneController>();
@@ -144,25 +167,25 @@ namespace Player
                 {
                     interactObj.Interact();
                     _inventory.CollectRune();
-                    
+
                     NotificationEventManager.ShowNotification("You find the RUNE");
                 }
             }
         }
-        
+
         private Vector3 GetCursorWorldPosition()
         {
             Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             return new Vector3(position.x, position.y, 0);
         }
-        
+
         public void TakeDamage(GameObject attacker, float damage)
         {
             if (attacker.gameObject.GetComponent<EnemyAi>() != null)
             {
                 _heals -= damage;
 
-                Debug.Log(_heals);
+                _playerMovement.GetHit();
                 
                 if (_heals < 0)
                 {

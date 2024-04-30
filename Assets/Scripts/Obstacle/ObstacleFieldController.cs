@@ -53,8 +53,6 @@ namespace Obstacle
             Vector3Int gridPosition = barrierTilemap.WorldToCell(position);
 
             barrierTilemap.SetTile(gridPosition, null);            
-            
-            Debug.Log(gridPosition);
         }
     }
 }

@@ -4,8 +4,15 @@ namespace Enemy
 {
     public class EnemyController : MonoBehaviour
     {
-        private float _health = 100;
+        [SerializeField] private float startHealth = 100;
         
+        private float _health = 100;
+
+        private void Awake()
+        {
+            _health = startHealth;
+        }
+
         public void Damage(float damage)
         {
             _health -= damage;
@@ -18,7 +25,10 @@ namespace Enemy
 
         private void Kill()
         {
-            Debug.Log("Dead");            
+            if (gameObject != null)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }
