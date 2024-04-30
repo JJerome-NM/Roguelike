@@ -1,5 +1,4 @@
-﻿using System;
-using DefaultNamespace;
+﻿using DefaultNamespace;
 using Game;
 using TMPro;
 using UnityEngine;
@@ -13,6 +12,7 @@ namespace UIController
         
         [SerializeField] private TextMeshProUGUI mainText;
         [SerializeField] private Button startButton;
+        [SerializeField] private Button exitButton;
         [SerializeField] private KeyCode hideKey = KeyCode.Escape;
         
         private TextMeshProUGUI _buttonText;
@@ -24,6 +24,7 @@ namespace UIController
             _buttonText = startButton.GetComponentInChildren<TextMeshProUGUI>();
             
             startButton.onClick.AddListener(OnStartButtonClick);
+            exitButton.onClick.AddListener(Application.Quit);
         }
 
         private void Start()

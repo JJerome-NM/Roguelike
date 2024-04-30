@@ -37,6 +37,8 @@ namespace Player
             _startLayerName = LayerMask.LayerToName(_startLayer);
             _heals = startHeals;
             
+            PlayerEventManager.OnPlayerHealsUpdated(_heals);
+            
             GlobalEventManager.OnGameStarted.AddListener(OnGameStarted);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
         }
@@ -50,6 +52,7 @@ namespace Player
                 transform.position = _startPosition;
                 
                 _heals = startHeals;
+                PlayerEventManager.OnPlayerHealsUpdated(_heals);
             }
         }
 
@@ -184,10 +187,11 @@ namespace Player
             if (attacker.gameObject.GetComponent<EnemyAi>() != null)
             {
                 _heals -= damage;
-
+                PlayerEventManager.OnPlayerHealsUpdated(_heals);
+                
                 _playerMovement.GetHit();
                 
-                if (_heals < 0)
+                if (_heals <= 0)
                 {
                     GlobalEventManager.StopGame(GameEndState.PlayerDied);
                 }

@@ -30,12 +30,13 @@ namespace DefaultNamespace
 
     public static class StateToStartButtonText
     {
+        private static readonly string NextLevelText = "Next level";
         private static readonly string RestartText = "Try again";
         private static readonly string ResumeText = "Resume";
 
         private static readonly Dictionary<GameEndState, string> ButtonText = new()
         {
-            { GameEndState.AllRunesWasFound, RestartText },
+            { GameEndState.AllRunesWasFound, NextLevelText },
             { GameEndState.PlayerDied, RestartText },
             { GameEndState.Pause, ResumeText }
         };

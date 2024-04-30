@@ -5,13 +5,18 @@ namespace Player
 {
     public class PlayerInventory : MonoBehaviour
     {
+        [SerializeField] private int globalRunesCount = 0;
+        
         public int collectedRunes { get; private set; } = 0;
 
         public void CollectRune()
         {
             ++collectedRunes;
-            
-            GlobalEventManager.StopGame(GameEndState.AllRunesWasFound);
+
+            if (collectedRunes >= globalRunesCount)
+            {
+                GlobalEventManager.StopGame(GameEndState.AllRunesWasFound);
+            }
         }
     }
 }

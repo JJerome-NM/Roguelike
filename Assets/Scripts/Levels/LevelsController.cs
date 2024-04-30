@@ -19,6 +19,8 @@ namespace Levels
             _currentLevel = startLevel;
             _currentMultiplayer = startLevelMultiplayer;
             
+            LevelsEventManager.UpdateLevel(1);
+            
             GlobalEventManager.OnGameStarted.AddListener(OnGameStarted);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
         }
