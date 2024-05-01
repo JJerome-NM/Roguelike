@@ -9,7 +9,8 @@ namespace UIController
     {
         [SerializeField] private GameObject notificationPanel;
         [SerializeField] private TextMeshProUGUI notificationText;
-
+        [SerializeField] private float defaultTimeout = 2f;
+        
         private Coroutine _notificationCoroutine;
 
         private void Start()
@@ -26,7 +27,7 @@ namespace UIController
                 _notificationCoroutine = null;
             }
             
-            _notificationCoroutine = StartCoroutine(ShowNotification(message, 1));
+            _notificationCoroutine = StartCoroutine(ShowNotification(message, defaultTimeout));
         }
 
         private IEnumerator ShowNotification(string message, float timeout)

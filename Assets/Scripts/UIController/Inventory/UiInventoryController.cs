@@ -7,7 +7,7 @@ namespace UIController.Inventory
 {
     public class UiInventoryController : MonoBehaviour
     {
-        private static readonly string RunesCountText = "Amount found runes - ";
+        private static readonly string RunesCountText = "Amount of runes found - ";
         
         public static bool IsInventoryOpen { get; private set; }
         

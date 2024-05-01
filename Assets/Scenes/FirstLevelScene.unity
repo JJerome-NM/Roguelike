@@ -50651,6 +50651,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   notificationPanel: {fileID: 581320092}
   notificationText: {fileID: 279514952}
+  defaultTimeout: 2
 --- !u!1 &1508687864
 GameObject:
   m_ObjectHideFlags: 0
@@ -51220,7 +51221,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Found amount of runes - '
+  m_text: 'Amount of runes found - '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -58701,12 +58702,12 @@ PrefabInstance:
     - target: {fileID: 2133157781202740305, guid: 751a28ce9634bec47b2ffae68b5d492a,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 20.79
+      value: -1.94
       objectReference: {fileID: 0}
     - target: {fileID: 2133157781202740305, guid: 751a28ce9634bec47b2ffae68b5d492a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -8.27
+      value: -2.7
       objectReference: {fileID: 0}
     - target: {fileID: 2133157781202740305, guid: 751a28ce9634bec47b2ffae68b5d492a,
         type: 3}
