@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  enemyPrefab: {fileID: 6431962396231662397, guid: b21ab0e405fbb8f46ad5d8197a77c700,
+  enemyPrefab: {fileID: 6431962396231662397, guid: ca7a0c39ad42c6f4ca9abb3159206f92,
     type: 3}
   maxEnemies: 1
   _spawnedEnemies: []
