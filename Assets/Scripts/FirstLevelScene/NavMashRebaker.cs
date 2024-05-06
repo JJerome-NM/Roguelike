@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using FirstLevelScene;
 using NavMeshPlus.Components;
 using UnityEngine;
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DefaultNamespace;
+using FirstLevelScene;
 using Photon.Pun;
 using UnityEngine;
 
@@ -113,7 +114,6 @@ namespace Player
         
         public void Attack(Action afterAnimationAction) => DoSAnimation("Attack", afterAnimationAction);
 
-        // public void GetHit(Action afterAnimationAction) => DoSAnimation("GetHit", afterAnimationAction);
         public void GetHit()
         {
             if (!_photonView.IsMine) return;

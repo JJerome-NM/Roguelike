@@ -1,4 +1,5 @@
 ﻿using DefaultNamespace;
+using FirstLevelScene;
 using Game;
 using Photon.Pun;
 using TMPro;
@@ -60,6 +61,13 @@ namespace UIController
                 {
                     { RoguelikeGame.GameIsRunning, true }
                 });
+
+                PhotonNetwork.CurrentRoom.IsOpen = false;
+                PhotonNetwork.CurrentRoom.IsVisible = false;
+            }
+            else
+            {
+                GlobalEventManager.StartGame(_endState.GetEndStateInversion());
             }
         }
     }

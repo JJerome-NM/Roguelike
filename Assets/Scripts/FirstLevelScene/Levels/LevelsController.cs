@@ -1,4 +1,5 @@
 ﻿using DefaultNamespace;
+using FirstLevelScene;
 using UnityEngine;
 
 namespace Levels

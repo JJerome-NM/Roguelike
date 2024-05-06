@@ -19,7 +19,7 @@ namespace FirstLevelScene.Multiplayer
 
         private void Start()
         {
-            UpdateReady();
+            UpdateReadyState();
             
             if (PhotonNetwork.LocalPlayer.ActorNumber != _ownerId)
             {
@@ -42,11 +42,11 @@ namespace FirstLevelScene.Multiplayer
                         { RoguelikeGame.PlayerIsReady, _isPlayerReady }
                     });
 
-                    UpdateReady();
+                    UpdateReadyState();
                     
                     if (PhotonNetwork.IsMasterClient)
                     {
-                        PlayerList.Instance.LocalPlayerPropertiesUpdated();
+                        PlayerList.Instance.UpdateStartButton();
                     }
                 });
             }
@@ -54,7 +54,7 @@ namespace FirstLevelScene.Multiplayer
 
         #endregion
 
-        private void UpdateReady()
+        private void UpdateReadyState()
         {
             if (PhotonNetwork.LocalPlayer.ActorNumber == _ownerId)
             {
@@ -90,9 +90,7 @@ namespace FirstLevelScene.Multiplayer
                 _isPlayerReady = (bool)isReady;
             }
 
-            Debug.Log(newPlayer.NickName + " - " + _isPlayerReady);
-            
-            UpdateReady();
+            UpdateReadyState();
         }
 
         public void SetPlayerReady(bool ready)

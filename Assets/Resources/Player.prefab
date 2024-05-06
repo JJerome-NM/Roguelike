@@ -47,7 +47,7 @@ MonoBehaviour:
   cameraBoundsObjectName: CameraBounds
   playerCharacter: {fileID: 7349365663218951041}
   player: {fileID: 2640657857044357907}
-  lerpSpeed: 2
+  lerpSpeed: 3
 --- !u!1 &5011909196975435296
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,7 +126,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e9a198753b34444a3282fb506d12ae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  globalRunesCount: 0
 --- !u!1001 &1270155703471039454
 PrefabInstance:
   m_ObjectHideFlags: 0

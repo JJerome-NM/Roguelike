@@ -1,4 +1,6 @@
 ﻿using DefaultNamespace;
+using FirstLevelScene;
+using FirstLevelScene.Player;
 using Player;
 using TMPro;
 using UnityEngine;
@@ -8,20 +10,25 @@ namespace UIController.Inventory
     public class UiInventoryController : MonoBehaviour
     {
         private static readonly string RunesCountText = "Amount of runes found - ";
-        
+
+        public static UiInventoryController Instance { get; private set; }
         public static bool IsInventoryOpen { get; private set; }
         
         [SerializeField] private TextMeshProUGUI runesCount;
-        [SerializeField] private PlayerInventory playerInventory;
+        
+        private PlayerInventory _playerInventory;
 
         private void Awake()
         {
+            Instance = this;
             GlobalEventManager.OnGameStarted.AddListener((_) => Hide());
             GlobalEventManager.OnGameStopped.AddListener((_) => Hide());
         }
 
         private void Start()
         {
+            _playerInventory = PlayerInventory.Instance;
+            
             Hide();
         }
 
@@ -44,7 +51,8 @@ namespace UIController.Inventory
 
         private void LoadInventory()
         {
-            runesCount.SetText(RunesCountText + playerInventory.collectedRunes);
+            _playerInventory ??= PlayerInventory.Instance;
+            runesCount.SetText(RunesCountText + _playerInventory.collectedRunes);
         }
     }
 }

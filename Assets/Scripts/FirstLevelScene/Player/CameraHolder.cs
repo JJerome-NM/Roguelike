@@ -59,7 +59,7 @@ namespace FirstLevelScene.Player
         
         private void Update()
         {
-            Vector3 lerpPos = Vector3.Lerp(_camera.transform.position, player.position + _offset, lerpSpeed * Time.deltaTime);
+            Vector3 lerpPos = Vector3.Lerp(_camera.transform.position, player.position + _offset, Time.deltaTime * lerpSpeed);
             _camera.transform.position = GetCameraBounds(lerpPos);
         }
 

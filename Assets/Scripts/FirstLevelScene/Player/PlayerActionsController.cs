@@ -1,6 +1,8 @@
 ﻿using System;
 using DefaultNamespace;
 using Enemy;
+using FirstLevelScene;
+using FirstLevelScene.Player;
 using InteractObjects;
 using Obstacle;
 using Photon.Pun;
@@ -125,7 +127,7 @@ namespace Player
             _playerMovement.Attack(() =>
             {
                 var targetCollider = Physics2D.OverlapCircle(cursorPosition, 0.01f, interactable);
-
+                
                 if (targetCollider != null)
                 {
                     switch (targetCollider.tag)
@@ -151,7 +153,6 @@ namespace Player
 
                 enemyController.Damage(100);
             }
-
             NotificationEventManager.ShowNotification("Hit");
         }
 

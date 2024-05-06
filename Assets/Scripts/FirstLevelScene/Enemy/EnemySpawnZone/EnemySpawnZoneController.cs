@@ -8,7 +8,6 @@ namespace FirstLevelScene.Enemy.EnemySpawnZone
 {
     public class EnemySpawnZoneController : MonoBehaviour
     {
-        [SerializeField] private GameObject player;
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private int maxEnemies = 1;
         
@@ -56,7 +55,6 @@ namespace FirstLevelScene.Enemy.EnemySpawnZone
             
                 var enemy = PhotonNetwork.Instantiate("Enemy", new Vector3(xPos, yPos, 0), Quaternion.identity);
                 var enemyAI = enemy.GetComponentInChildren<EnemyAi>();
-                enemyAI.InitPlayer(player);
                 _spawnedEnemies.Add(enemy.GetComponentInChildren<EnemyController>());
             }
         }

@@ -3,6 +3,8 @@ using DefaultNamespace;
 using ExitGames.Client.Photon;
 using Global.Multiplayer;
 using Photon.Pun;
+using Player;
+using UIController.Inventory;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -26,6 +28,18 @@ namespace FirstLevelScene.Multiplayer
         {
             _playerList = PlayerList.Instance;
             _playerListEntrys = _playerList._playerListEntrys;
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                var runes = GameObject.FindGameObjectsWithTag("Rune");
+
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new()
+                {
+                    { RoguelikeGame.GlobalRunesCount, runes.Length },
+                    { RoguelikeGame.CollectedRunes, 0 }
+                });
+            }
+            
             
             foreach (Photon.Realtime.Player p in PhotonNetwork.PlayerList)
             {
@@ -64,6 +78,8 @@ namespace FirstLevelScene.Multiplayer
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
         {
             ServerNotificationEventManager.SendNotification(otherPlayer.NickName + " leave the room");
+
+            _playerList.RemovePlayer(otherPlayer);
         }
 
         public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player targetPlayer, Hashtable changedProps)
@@ -83,6 +99,12 @@ namespace FirstLevelScene.Multiplayer
         
         public void Leave()
         {
+            
+            PhotonNetwork.LocalPlayer.SetCustomProperties(new()
+            {
+                { RoguelikeGame.PlayerIsReady, false }
+            });
+            
             PhotonNetwork.LeaveRoom();
         }
     }

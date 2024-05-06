@@ -1,8 +1,9 @@
 ﻿using DefaultNamespace;
+using UIController;
 using UIController.Inventory;
 using UnityEngine;
 
-namespace UIController
+namespace FirstLevelScene.UIController
 {
     public class UIController : MonoBehaviour
     {

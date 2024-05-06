@@ -1,5 +1,7 @@
 ﻿using System.Collections;
+using System.Linq;
 using DefaultNamespace;
+using FirstLevelScene;
 using Levels;
 using Player;
 using UnityEngine;
@@ -9,7 +11,6 @@ namespace Enemy
 {
     public class EnemyAi : MonoBehaviour
     {
-        [SerializeField] private GameObject player;
         [SerializeField] private LayerMask playerLayer;
         
         [Header("Search")] 
@@ -22,57 +23,42 @@ namespace Enemy
         [SerializeField] private float attackDistance = 1.5f;
         [SerializeField] private float hitDistance = 2f;
         [SerializeField] private float damage = 25;
-        
+
         [Header("Animation")] 
         [SerializeField] private float updateAnimationDelay = 0.05f;
-        
-        private PlayerActionsController _playerAC;
+
         private NavMeshAgent _navAgent;
-        
+
         private Coroutine _searchCoroutine;
         private Coroutine _chaseCoroutine;
         private Coroutine _updateAnimationCoroutine;
         private SkeletonAnimationController _animation;
         private Vector3 _startPosition;
-        
+        private GameObject _player;
+        private PlayerActionsController _playerAC;
+
         private void Awake()
         {
-            if (player != null)
-            {
-                _playerAC = player.GetComponent<PlayerActionsController>();
-            }
             _navAgent = GetComponent<NavMeshAgent>();
             _animation = GetComponent<SkeletonAnimationController>();
             _startPosition = transform.position;
-        
+
             GlobalEventManager.OnGameStarted.AddListener(OnGameStart);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
-            LevelsEventManager.OnLevelMultiplayerUpdated.AddListener((multiplayer) =>
-            {
-                damage += multiplayer;
-            });
+            LevelsEventManager.OnLevelMultiplayerUpdated.AddListener((multiplayer) => { damage += multiplayer; });
         }
 
-        public void InitPlayer(GameObject p)
-        {
-            if (p != null)
-            {
-                player = p;
-                _playerAC = player.GetComponent<PlayerActionsController>();
-            }
-        }
-        
         private void OnGameStart(GameStartState state)
         {
             StartSearch();
             StartUpdateAnimation();
         }
-        
+
         private void OnGameStopped(GameEndState state)
         {
             StopChase();
             StopSearch();
-            
+
             if (state != GameEndState.Pause)
             {
                 _navAgent.SetDestination(_startPosition);
@@ -83,7 +69,7 @@ namespace Enemy
                 _navAgent.SetDestination(transform.position);
             }
         }
-        
+
         private IEnumerator UpdateAnimations()
         {
             while (true)
@@ -92,12 +78,12 @@ namespace Enemy
                 {
                     StopUpdateAnimation();
                 }
-                
+
                 SetAnimationMoveDirection();
                 yield return new WaitForSeconds(updateAnimationDelay);
             }
         }
-        
+
         private IEnumerator SearchPlayer()
         {
             while (true)
@@ -106,26 +92,31 @@ namespace Enemy
                 {
                     StartUpdateAnimation();
                 }
-                
-                var distanceTopPlayer = Vector3.Distance(transform.position, player.transform.position);
-                if (distanceTopPlayer < searchDistance)
+
+                var target = Physics2D.OverlapCircleAll(transform.position, searchDistance)
+                    .ToList()
+                    .Find(t => t.CompareTag("Player"));
+
+                if (target != null)
                 {
+                    _player = target.gameObject;
+                    _playerAC = _player.GetComponent<PlayerActionsController>();
+                    
                     StopSearch();
                     StartChase();
                 }
-        
                 yield return new WaitForSeconds(searchDelay);
             }
         }
-        
+
         private IEnumerator ChasePlayer()
         {
             while (true)
             {
                 if (_animation.canMove)
                 {
-                    var distanceTopPlayer = Vector3.Distance(transform.position, player.transform.position);
-        
+                    var distanceTopPlayer = Vector3.Distance(transform.position, _player.transform.position);
+
                     if (distanceTopPlayer < chaseDistance)
                     {
                         if (distanceTopPlayer < attackDistance)
@@ -134,7 +125,7 @@ namespace Enemy
                         }
                         else
                         {
-                            _navAgent.SetDestination(player.transform.position);
+                            _navAgent.SetDestination(_player.transform.position);
                             StartUpdateAnimation();
                         }
                     }
@@ -144,22 +135,22 @@ namespace Enemy
                         StopChase();
                         StartSearch();
                     }
-        
                 }
+
                 yield return new WaitForSeconds(chaseDelay);
             }
         }
-        
+
         private void AttackPlayer()
         {
             StopUpdateAnimation();
             SetPlayerDirection();
-                        
+
             _navAgent.SetDestination(transform.position);
             _animation.Attack(() =>
             {
-                var distanceTopPlayer = Vector3.Distance(transform.position, player.transform.position);
-        
+                var distanceTopPlayer = Vector3.Distance(transform.position, _player.transform.position);
+
                 if (distanceTopPlayer < hitDistance)
                 {
                     SetPlayerDirection();
@@ -167,29 +158,29 @@ namespace Enemy
                 }
             });
         }
-        
+
         private void SetAnimationMoveDirection()
         {
-            _animation.SetCharacterDirection(GetMoveDirection(transform.position, _navAgent.steeringTarget)); 
+            _animation.SetCharacterDirection(GetMoveDirection(transform.position, _navAgent.steeringTarget));
         }
-        
+
         private void SetPlayerDirection()
         {
-            _animation.SetCharacterDirection(GetMoveDirection(transform.position, player.transform.position));
+            _animation.SetCharacterDirection(GetMoveDirection(transform.position, _player.transform.position));
         }
-        
+
         private void StartUpdateAnimation() => _updateAnimationCoroutine ??= StartCoroutine(UpdateAnimations());
-        
+
         private void StopUpdateAnimation() => StopMyCoroutine(ref _updateAnimationCoroutine);
-        
+
         private void StartChase() => _chaseCoroutine ??= StartCoroutine(ChasePlayer());
-        
+
         private void StopChase() => StopMyCoroutine(ref _chaseCoroutine);
-        
+
         private void StartSearch() => _searchCoroutine ??= StartCoroutine(SearchPlayer());
-        
+
         private void StopSearch() => StopMyCoroutine(ref _searchCoroutine);
-        
+
         private void StopMyCoroutine(ref Coroutine coroutine)
         {
             if (coroutine != null)
@@ -198,7 +189,7 @@ namespace Enemy
                 coroutine = null;
             }
         }
-        
+
         private Vector2 GetMoveDirection(Vector3 firstPosition, Vector3 secondPosition)
         {
             return -(firstPosition - secondPosition).normalized;

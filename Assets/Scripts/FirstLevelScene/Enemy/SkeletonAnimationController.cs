@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Serialization;
 
 namespace Enemy
 {
@@ -37,12 +36,6 @@ namespace Enemy
             
             GetAnimationsTime();
         }
-
-        // public void Init(Animator animator, NavMeshAgent navMeshAgent)
-        // {
-        //     _animator = animator;
-        //     _navMeshAgent = navMeshAgent;
-        // }
         
         private void GetAnimationsTime()
         {

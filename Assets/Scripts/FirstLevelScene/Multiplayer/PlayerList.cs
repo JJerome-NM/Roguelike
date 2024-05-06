@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DefaultNamespace;
 using Photon.Pun;
 using UnityEngine;
@@ -26,18 +27,39 @@ namespace FirstLevelScene.Multiplayer
         
         public void AddPlayer(Photon.Realtime.Player player)
         {
-            GameObject entry = Instantiate(playerListEntry);
+            AddPlayerInView(player, out var entry);
+            _playerListEntrys.Add(player.ActorNumber, entry);
+            startButton.gameObject.SetActive(CheckPlayersIsReady());
+        }
+
+        public void RemovePlayer(Photon.Realtime.Player player)
+        {
+            foreach (Transform child in gameObject.transform)
+            {
+                Destroy(child.gameObject);
+            }
+            
+            _playerListEntrys.Clear();
+
+            foreach (Photon.Realtime.Player p in PhotonNetwork.PlayerList)
+            {
+                if (!p.Equals(player))
+                {
+                    AddPlayer(p);
+                }
+            }
+        }
+
+        private void AddPlayerInView(Photon.Realtime.Player player, out GameObject entry)
+        {
+            entry = Instantiate(playerListEntry);
             entry.transform.SetParent(gameObject.transform);
             entry.transform.localScale = Vector3.one;
             RectTransform entryTransform = entry.GetComponent<RectTransform>();
             entryTransform.offsetMax = new Vector2(0, -50 * _playerListEntrys.Count);
             entryTransform.offsetMin = new Vector2(0, -50 * (_playerListEntrys.Count + 1));
-            
+
             entry.GetComponent<PlayerListEntry>().Initialize(player);
-            
-            _playerListEntrys.Add(player.ActorNumber, entry);
-            
-            startButton.gameObject.SetActive(CheckPlayersIsReady());
         }
 
         public void UpdateStartButton()
@@ -65,11 +87,6 @@ namespace FirstLevelScene.Multiplayer
             }
 
             return true;
-        }
-
-        public void LocalPlayerPropertiesUpdated()
-        {
-            startButton.gameObject.SetActive(CheckPlayersIsReady());
         }
     }
 }

@@ -1,30 +1,54 @@
 ﻿using DefaultNamespace;
+using ExitGames.Client.Photon;
 using Levels;
-using UnityEngine;
+using Photon.Pun;
 
-namespace Player
+namespace FirstLevelScene.Player
 {
-    public class PlayerInventory : MonoBehaviour
+    public class PlayerInventory : MonoBehaviourPunCallbacks
     {
-        [SerializeField] private int globalRunesCount = 0;
+        public static PlayerInventory Instance { get; private set; }
         
+        private int _globalRunesCount = 0;
         public int collectedRunes { get; private set; } = 0;
 
         private void Awake()
         {
+            Instance = this;
             LevelsEventManager.OnLevelUpdated.AddListener((_) =>
             {
                 collectedRunes = 0;
             });
+            
+            if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(RoguelikeGame.GlobalRunesCount, out var runesCount))
+            {
+                _globalRunesCount = (int)runesCount;
+            }
         }
 
         public void CollectRune()
         {
-            ++collectedRunes;
-
-            if (collectedRunes >= globalRunesCount)
+            if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(RoguelikeGame.CollectedRunes, out var runesCount))
             {
-                GlobalEventManager.StopGame(GameEndState.AllRunesWasFound);
+                collectedRunes = (int)runesCount;
+
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new()
+                {
+                    { RoguelikeGame.CollectedRunes, (int)runesCount + 1 }
+                });
+            }
+        }
+        
+        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+        {
+            if (propertiesThatChanged.TryGetValue(RoguelikeGame.CollectedRunes, out var runesCount))
+            {
+                collectedRunes = (int)runesCount;
+
+                if (PhotonNetwork.IsMasterClient && collectedRunes >= _globalRunesCount)
+                {
+                    GlobalEventManager.StopGame(GameEndState.AllRunesWasFound);
+                }
             }
         }
     }

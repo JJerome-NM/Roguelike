@@ -1,4 +1,5 @@
 ﻿using ExitGames.Client.Photon;
+using FirstLevelScene;
 using Photon.Pun;
 
 namespace DefaultNamespace
@@ -16,7 +17,7 @@ namespace DefaultNamespace
                 return oldVersion;
             }
 
-            private set => _isFirstStart = value;
+            private set => _isFirstStart = false;
         }
 
         public static bool IsGameRunning { get; private set; }
