@@ -1,5 +1,6 @@
 ﻿using DefaultNamespace;
 using FirstLevelScene;
+using FirstLevelScene.Game;
 using UnityEngine;
 
 namespace Levels

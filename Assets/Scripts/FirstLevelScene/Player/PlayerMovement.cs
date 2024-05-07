@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DefaultNamespace;
 using FirstLevelScene;
+using FirstLevelScene.Game;
 using Photon.Pun;
 using UnityEngine;
 

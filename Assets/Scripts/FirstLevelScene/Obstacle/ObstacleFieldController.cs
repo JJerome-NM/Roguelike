@@ -1,11 +1,13 @@
-﻿using DefaultNamespace;
-using FirstLevelScene;
+﻿using System.Collections.Generic;
+using Obstacle;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
 
-namespace Obstacle
+namespace FirstLevelScene.Obstacle
 {
+    [RequireComponent(typeof(PhotonView))]
     public class ObstacleFieldController : MonoBehaviour
     {
         [SerializeField] private Tilemap barrierTilemap;
@@ -15,45 +17,74 @@ namespace Obstacle
 
         [SerializeField] private int barrierChance;
         
-        [SerializeField] private int height;
-        [SerializeField] private int width;
-        
+        private PhotonView _photonView;
         private Vector3Int[] _fieldPosition;
-
-        private void Start()
+        
+        private void Awake()
         {
             _fieldPosition = grassTilemap.GetTilePositionWithType<TileBase>(grassTiles[0].GetType());
-
-            GenerateBarriers();
-            RandomizeGrass();
+            _photonView = GetComponent<PhotonView>();
             
-            GlobalEventManager.UpdateObstacleFields();
+            GlobalEventManager.OnGameStarted.AddListener((_) => GenerateBarriers());
         }
 
         private void GenerateBarriers()
         {
+            if (!PhotonNetwork.IsMasterClient) return;
+
+            List<Vector3> positions = new ();
             foreach (Vector3Int pos in _fieldPosition)
             {
                 if (Random.Range(0, 100) > barrierChance)
                 {
-                    barrierTilemap.SetTile(pos, barrier);
+                    positions.Add(barrierTilemap.CellToWorld(pos));
                 }
             }
+
+            _photonView.RPC(nameof(SpawnBarriersOnOtherClients), RpcTarget.Others, positions.ToArray());
+
+            AddBarriersToTilemap(positions.ToArray());
         }
 
-        private void RandomizeGrass()
-        {
-            foreach (Vector3Int pos in _fieldPosition)
-            {
-                grassTilemap.SetTile(pos, grassTiles[Random.Range(0, grassTiles.Length)]);
-            }
-        } 
-        
         public void DestroyTile(Vector3 position)
         {
             Vector3Int gridPosition = barrierTilemap.WorldToCell(position);
 
-            barrierTilemap.SetTile(gridPosition, null);            
+            barrierTilemap.SetTile(gridPosition, null);
+            
+            _photonView.RPC(nameof(DestroyOnOther), RpcTarget.Others, position);
+
+            GlobalEventManager.UpdateObstacleFields();
         }
+
+        private void AddBarriersToTilemap(Vector3[] positions)
+        {
+            foreach (var position in positions)
+            {
+                var gridPosition = barrierTilemap.WorldToCell(position);
+                barrierTilemap.SetTile(gridPosition, barrier);
+            }
+            
+            GlobalEventManager.UpdateObstacleFields();
+        }
+        
+        #region RPC
+
+        [PunRPC]
+        private void SpawnBarriersOnOtherClients(Vector3[] positions)
+        {
+            AddBarriersToTilemap(positions);
+        }
+
+        [PunRPC]
+        private void DestroyOnOther(Vector3 position)
+        {
+            Vector3Int gridPosition = barrierTilemap.WorldToCell(position);
+            barrierTilemap.SetTile(gridPosition, null);   
+            
+            GlobalEventManager.UpdateObstacleFields();
+        }
+
+        #endregion
     }
 }

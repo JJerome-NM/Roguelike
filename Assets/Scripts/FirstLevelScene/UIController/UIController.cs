@@ -1,4 +1,5 @@
 ﻿using DefaultNamespace;
+using FirstLevelScene.Game;
 using UIController;
 using UIController.Inventory;
 using UnityEngine;

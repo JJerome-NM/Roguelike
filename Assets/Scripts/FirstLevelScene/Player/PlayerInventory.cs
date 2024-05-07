@@ -1,5 +1,6 @@
 ﻿using DefaultNamespace;
 using ExitGames.Client.Photon;
+using FirstLevelScene.Game;
 using Levels;
 using Photon.Pun;
 

@@ -11,15 +11,16 @@ namespace LobbyScene.UI
         [SerializeField] private TMP_InputField nicknameInputField;
         [SerializeField] private Button connectRoomButton;
         [SerializeField] private Button connectToRandomRoomButton;
-
+        [SerializeField] private Button quitButton;
         [SerializeField] private LobbyManager lobbyManager;
 
         private void Awake()
         {
             connectRoomButton.onClick.AddListener(lobbyManager.CreateRoom);
             connectToRandomRoomButton.onClick.AddListener(lobbyManager.ConnectToRandomRoom);
+            quitButton.onClick.AddListener(Application.Quit);
 
-            nicknameInputField.text = "Player - " + Random.Range(0, 9999);
+            nicknameInputField.text = "Player - " + Random.Range(1000, 9999);
             nicknameInputField.onEndEdit.Invoke(nicknameInputField.text);
         }
 

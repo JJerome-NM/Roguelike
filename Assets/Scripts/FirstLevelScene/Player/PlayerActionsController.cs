@@ -2,6 +2,8 @@
 using DefaultNamespace;
 using Enemy;
 using FirstLevelScene;
+using FirstLevelScene.Game;
+using FirstLevelScene.Obstacle;
 using FirstLevelScene.Player;
 using InteractObjects;
 using Obstacle;
@@ -10,53 +12,70 @@ using TMPro;
 using UIController;
 using UIController.Inventory;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Player
 {
     [RequireComponent(typeof(PhotonView), typeof(PlayerMovement))]
     public class PlayerActionsController : MonoBehaviour
     {
+        private static readonly string HealthText = "HP - ";
+
+        [SerializeField] private float damage = 25;
         [SerializeField] private float maxHitDistance = 2;
         [SerializeField] private float maxInteractionDistance = 2;
         [SerializeField] private LayerMask enemyLayer;
         [SerializeField] private LayerMask interactable;
         [SerializeField] private PlayerInventory _inventory;
         [SerializeField] private float startHeals = 100;
+        [SerializeField] private TextMeshPro nickname;
+        [SerializeField] private TextMeshPro health;
 
         [Header("Other")] 
         [SerializeField] private NotificationController _notification;
 
         private PlayerMovement _playerMovement;
         private bool _performsAction = false;
-        private float _heals = 100;
-        private TextMeshProUGUI _nickname;
+        private float _health = 100;
         private PhotonView _photonView;
         
         private Vector3 _startPosition;
         private LayerMask _startLayer;
         private string _startLayerName;
+
+        private int _ownerId = -1;
         
         private void Awake()
         {
             _photonView = GetComponent<PhotonView>();
-            _nickname = GetComponentInChildren<TextMeshProUGUI>();
             _playerMovement = GetComponent<PlayerMovement>();
             _startPosition = transform.position;
             _startLayer = gameObject.layer;
             _startLayerName = LayerMask.LayerToName(_startLayer);
-            _heals = startHeals;
+            _health = startHeals;
+            _ownerId = _photonView.Owner.ActorNumber;
 
-            if (_nickname != null)
+            if (nickname != null)
             {
-                _nickname.SetText(_photonView.Owner.NickName);
+                nickname.SetText(_photonView.IsMine ? "You" : _photonView.Owner.NickName);
             }
+
+            UpdateHealthText();
             
-            PlayerEventManager.OnPlayerHealsUpdated(_heals);
+            PlayerEventManager.OnPlayerHealsUpdated(_health);
             
             GlobalEventManager.OnGameStarted.AddListener(OnGameStarted);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
         }
 
+        private void UpdateHealthText()
+        {
+            if (health != null)
+            {
+                health.SetText(HealthText + _health.ToString("F0"));
+            }
+        }
+        
         private void OnGameStarted(GameStartState state)
         {
             if (state != GameStartState.Resume)
@@ -65,8 +84,8 @@ namespace Player
                 gameObject.layer = _startLayer;
                 transform.position = _startPosition;
                 
-                _heals = startHeals;
-                PlayerEventManager.OnPlayerHealsUpdated(_heals);
+                _health = startHeals;
+                PlayerEventManager.OnPlayerHealsUpdated(_health);
             }
         }
 
@@ -86,7 +105,7 @@ namespace Player
         private void Start()
         {
             _playerMovement = GetComponent<PlayerMovement>();
-            _heals = startHeals;
+            _health = startHeals;
         }
 
         private void Update()
@@ -108,7 +127,8 @@ namespace Player
         {
             if (_performsAction
                 || GlobalStateManager.IsGameStopped
-                || UiInventoryController.IsInventoryOpen) return;
+                || UiInventoryController.IsInventoryOpen
+                || !_photonView.IsMine) return;
 
             action.Invoke();
         }
@@ -151,14 +171,14 @@ namespace Player
             {
                 var enemyController = enemy.gameObject.GetComponent<EnemyController>();
 
-                enemyController.Damage(100);
+                enemyController.Damage(damage);
             }
             NotificationEventManager.ShowNotification("Hit");
         }
 
-        private void DestroyTile(Collider2D collider, Vector3 cursorPosition)
+        private void DestroyTile(Collider2D c, Vector3 cursorPosition)
         {
-            var fieldController = collider.GetComponentInParent<ObstacleFieldController>();
+            var fieldController = c.GetComponentInParent<ObstacleFieldController>();
 
             fieldController.DestroyTile(cursorPosition);
 
@@ -168,17 +188,17 @@ namespace Player
         private void Interact()
         {
             var cursorPosition = GetCursorWorldPosition();
-            var distanceToCursor = Vector3.Distance(transform.position, GetCursorWorldPosition());
+            var distanceToCursor = Vector3.Distance(transform.position, cursorPosition);
 
             if (distanceToCursor > maxInteractionDistance) return;
 
-            var collider = Physics2D.OverlapCircle(cursorPosition, 0.01f, interactable);
+            var c = Physics2D.OverlapCircle(cursorPosition, 0.01f, interactable);
 
-            if (collider == null) return;
+            if (c == null) return;
 
-            if (collider.gameObject.CompareTag("Rune"))
+            if (c.gameObject.CompareTag("Rune"))
             {
-                var interactObj = collider.gameObject.GetComponent<RuneController>();
+                var interactObj = c.gameObject.GetComponent<RuneController>();
                 if (!interactObj.IsCollected())
                 {
                     interactObj.Interact();
@@ -197,18 +217,43 @@ namespace Player
 
         public void TakeDamage(GameObject attacker, float damage)
         {
-            if (attacker.gameObject.GetComponent<EnemyAi>() != null)
+            if (attacker.gameObject.GetComponent<EnemyAi>() != null && _photonView.IsMine)
             {
-                _heals -= damage;
-                PlayerEventManager.OnPlayerHealsUpdated(_heals);
+                _health -= damage;
+                PlayerEventManager.OnPlayerHealsUpdated(_health);
+                UpdateHealthText();
                 
                 _playerMovement.GetHit();
+
+                _photonView.RPC(nameof(ChangeOtherPlayerHeals), RpcTarget.Others, _photonView.Owner.ActorNumber, _health);
                 
-                if (_heals <= 0)
+                if (_health <= 0)
                 {
                     GlobalEventManager.StopGame(GameEndState.PlayerDied);
                 }
             }
         }
+
+        #region RPC
+
+        [PunRPC]
+        private void ChangeOtherPlayerHeals(int playerId, float newHeals)
+        {
+            if (playerId == _ownerId)
+            {
+                _health = newHeals;
+                UpdateHealthText();
+
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    if (_health <= 0)
+                    {
+                        GlobalEventManager.StopGame(GameEndState.PlayerDied);
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

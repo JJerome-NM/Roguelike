@@ -1,6 +1,6 @@
 ﻿using DefaultNamespace;
 using FirstLevelScene;
-using Game;
+using FirstLevelScene.Game;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
@@ -11,7 +11,8 @@ namespace UIController
     public class MainPanelController : MonoBehaviour
     {
         public static bool IsMainPanelOpen { get; private set; } = true;
-        
+
+        [SerializeField] private TextMeshProUGUI roomName;
         [SerializeField] private TextMeshProUGUI mainText;
         [SerializeField] private Button startButton;
         [SerializeField] private Button exitButton;
@@ -31,9 +32,7 @@ namespace UIController
 
         private void Start()
         {
-            _buttonText = startButton.GetComponentInChildren<TextMeshProUGUI>();
-            
-            startButton.onClick.AddListener(OnStartButtonClick);
+            roomName.SetText(PhotonNetwork.CurrentRoom.Name);
         }
 
         public void Hide(GameStartState state)

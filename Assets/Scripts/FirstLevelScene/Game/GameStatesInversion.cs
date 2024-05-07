@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using DefaultNamespace;
 
-namespace Game
+namespace FirstLevelScene.Game
 {
     public static class GameStatesInversion
     {

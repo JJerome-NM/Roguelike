@@ -61,5 +61,26 @@ namespace Obstacle
 
             return positions.ToArray();
         }
+        
+        public static Dictionary<Vector3Int, T> GetTileDictionaryWithType<T>(this Tilemap tilemap, Type type) where T : TileBase
+        {
+            Dictionary<Vector3Int, T> positions = new ();
+
+            for (int y = tilemap.origin.y; y < tilemap.origin.y + tilemap.size.y; y++)
+            {
+                for (int x = tilemap.origin.x; x < tilemap.origin.x + tilemap.size.x; x++)
+                {
+                    var position = new Vector3Int(x, y, 0);
+                    T tile = tilemap.GetTile<T>(position);
+                    
+                    if (tile != null && tile.GetType() == type)
+                    {
+                        positions.Add(position, tile);
+                    }
+                }
+            }
+
+            return positions;
+        }
     }
 }

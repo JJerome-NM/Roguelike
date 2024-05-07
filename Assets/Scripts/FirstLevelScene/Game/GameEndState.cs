@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DefaultNamespace
+namespace FirstLevelScene.Game
 {
     public enum GameEndState
     {

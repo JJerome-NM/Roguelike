@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using DefaultNamespace;
-using FirstLevelScene.Multiplayer;
+﻿using DefaultNamespace;
 using Global.Multiplayer;
 using LobbyScene.UI;
 using Photon.Pun;
@@ -11,10 +9,15 @@ namespace LobbyScene.Lobby
 {
     public class LobbyManager : MonoBehaviourPunCallbacks
     {
+        public static LobbyManager Instance { get; private set; }
+        
         [SerializeField] private UIMainPanel mainPanel;
 
         private void Awake()
         {
+            Instance = this;
+
+            PhotonNetwork.AutomaticallySyncScene = true;
             mainPanel.AddNicknameChangesListener((text) => { PhotonNetwork.NickName = text;});
         }
 
@@ -41,25 +44,25 @@ namespace LobbyScene.Lobby
         public override void OnConnectedToMaster()
         {
             ServerNotificationEventManager.SendNotification("Connected to master");
+            
+            if (!PhotonNetwork.InLobby)
+            {
+                PhotonNetwork.JoinLobby();
+            }
         }
 
         public override void OnJoinedRoom()
         {
+            Debug.Log(PhotonNetwork.CountOfRooms);
             PhotonNetwork.LoadLevel(SceneNames.Level1);
             ServerNotificationEventManager.SendNotification("Joined the room");
         }
 
-        public override void OnJoinedLobby()
-        {
-            mainPanel.gameObject.SetActive(false);
-        }
-
         #endregion
-
 
         public void CreateRoom()
         {
-            PhotonNetwork.CreateRoom(null, new RoomOptions()
+            PhotonNetwork.CreateRoom("Room - " + Random.Range(1000, 9999), new RoomOptions()
             {
                 MaxPlayers = 4,
                 CustomRoomProperties = new ()
@@ -69,6 +72,11 @@ namespace LobbyScene.Lobby
             });
         }
 
+        public void JoinRoom(string roomName)
+        {
+            PhotonNetwork.JoinRoom(roomName);
+        }
+        
         public void ConnectToRandomRoom()
         {
             PhotonNetwork.JoinRandomRoom();

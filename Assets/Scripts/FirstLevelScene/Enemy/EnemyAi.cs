@@ -2,6 +2,7 @@
 using System.Linq;
 using DefaultNamespace;
 using FirstLevelScene;
+using FirstLevelScene.Game;
 using Levels;
 using Player;
 using UnityEngine;
@@ -115,11 +116,11 @@ namespace Enemy
             {
                 if (_animation.canMove)
                 {
-                    var distanceTopPlayer = Vector3.Distance(transform.position, _player.transform.position);
+                    var distanceToPlayer = Vector3.Distance(transform.position, _player.transform.position);
 
-                    if (distanceTopPlayer < chaseDistance)
+                    if (distanceToPlayer < chaseDistance)
                     {
-                        if (distanceTopPlayer < attackDistance)
+                        if (distanceToPlayer < attackDistance)
                         {
                             AttackPlayer();
                         }
