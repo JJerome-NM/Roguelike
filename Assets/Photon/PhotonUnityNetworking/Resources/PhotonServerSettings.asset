@@ -43,6 +43,8 @@ MonoBehaviour:
   - ChangeEnemyHealsForOtherPlayers
   - SpawnBarriersOnOtherClients
   - DestroyOnOther
+  - UpdateLoopedAnimationForOther
+  - UpdateSimpleAnimationInOthers
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

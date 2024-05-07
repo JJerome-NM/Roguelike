@@ -10,5 +10,6 @@ namespace Player
         {
             OnPlayerHealsUpdate.Invoke(newHeals);
         }
+        
     }
 }

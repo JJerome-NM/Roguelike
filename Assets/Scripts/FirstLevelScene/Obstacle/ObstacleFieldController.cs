@@ -16,7 +16,7 @@ namespace FirstLevelScene.Obstacle
         [SerializeField] private TileBase[] grassTiles;
 
         [SerializeField] private int barrierChance;
-        
+
         private PhotonView _photonView;
         private Vector3Int[] _fieldPosition;
         

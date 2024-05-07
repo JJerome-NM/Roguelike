@@ -3,6 +3,7 @@ using Global.Multiplayer;
 using LobbyScene.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
 using UnityEngine;
 
 namespace LobbyScene.Lobby
@@ -12,6 +13,7 @@ namespace LobbyScene.Lobby
         public static LobbyManager Instance { get; private set; }
         
         [SerializeField] private UIMainPanel mainPanel;
+        [SerializeField] private TextMeshProUGUI connectingText;
 
         private void Awake()
         {
@@ -19,6 +21,8 @@ namespace LobbyScene.Lobby
 
             PhotonNetwork.AutomaticallySyncScene = true;
             mainPanel.AddNicknameChangesListener((text) => { PhotonNetwork.NickName = text;});
+            mainPanel.gameObject.SetActive(false);
+            connectingText.gameObject.SetActive(true);
         }
 
         private void Start()
@@ -44,6 +48,9 @@ namespace LobbyScene.Lobby
         public override void OnConnectedToMaster()
         {
             ServerNotificationEventManager.SendNotification("Connected to master");
+            
+            connectingText.gameObject.SetActive(false);
+            mainPanel.gameObject.SetActive(true);
             
             if (!PhotonNetwork.InLobby)
             {

@@ -85,6 +85,7 @@ namespace Player
                 transform.position = _startPosition;
                 
                 _health = startHeals;
+                UpdateHealthText();
                 PlayerEventManager.OnPlayerHealsUpdated(_health);
             }
         }

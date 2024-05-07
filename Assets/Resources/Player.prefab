@@ -186,7 +186,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -105541197
   m_SortingLayer: 3
-  m_SortingOrder: 5
+  m_SortingOrder: 999
   m_SortAtRoot: 0
 --- !u!1 &2040879686506192391
 GameObject:
@@ -422,7 +422,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -105541197
   m_SortingLayer: 3
-  m_SortingOrder: 5
+  m_SortingOrder: 999
   m_SortAtRoot: 0
 --- !u!1 &5011909196975435296
 GameObject:
@@ -891,16 +891,16 @@ MonoBehaviour:
     SynchronizeType: 2
     Name: Vertical
   - Type: 4
-    SynchronizeType: 2
+    SynchronizeType: 1
     Name: Block
   - Type: 4
-    SynchronizeType: 2
+    SynchronizeType: 1
     Name: Run
   - Type: 4
-    SynchronizeType: 2
+    SynchronizeType: 1
     Name: Stunned
   - Type: 4
-    SynchronizeType: 2
+    SynchronizeType: 1
     Name: Walk
   m_SynchronizeLayers:
   - SynchronizeType: 2

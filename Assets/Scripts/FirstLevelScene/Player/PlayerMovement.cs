@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace Player
 {
+    [RequireComponent(typeof(PhotonView))]
     public class PlayerMovement : MonoBehaviour
     {
         private static readonly string[] LoopedAnimations = { "Run", "Walk", "Stunned" };
@@ -139,7 +140,6 @@ namespace Player
         
         private void SelectSimpleAnimation(string anim, Action afterAnimationAction)
         {
-            if (!_photonView.IsMine) return;
             if (SimpleAnimations.Contains(anim))
             {
                 if (_animationCoroutine != null)
@@ -151,6 +151,7 @@ namespace Player
                 _currentAnimation = anim;
                 _animator.Play(_currentAnimation);
                 _animationCoroutine = StartCoroutine(ResetSimpleAnimation(_currentAnimation, afterAnimationAction));
+                _photonView.RPC(nameof(UpdateSimpleAnimationInOthers), RpcTarget.Others, anim);
             }
         }
 
@@ -164,8 +165,7 @@ namespace Player
         
         private void SelectLoopedAnimation()
         {
-            if (!_photonView.IsMine) return;
-            if (SimpleAnimations.Contains(_currentAnimation)) return;
+            if (SimpleAnimations.Contains(_currentAnimation) || !_photonView.IsMine) return;
             
             float magnitude = _rb.velocity.magnitude;
 
@@ -176,6 +176,7 @@ namespace Player
                     _animator.SetBool(_currentAnimation, false);
                 }
                 _currentAnimation = string.Empty;
+                _photonView.RPC(nameof(UpdateLoopedAnimationForOther), RpcTarget.Others, _currentAnimation);
                 return;
             }
 
@@ -184,7 +185,40 @@ namespace Player
             {
                 _animator.SetBool(_currentAnimation, true);
                 _animator.Play(_currentAnimation);
+                
+                _photonView.RPC(nameof(UpdateLoopedAnimationForOther), RpcTarget.Others, _currentAnimation);
             }
         }
+
+        #region RPC
+
+        [PunRPC]
+        public void UpdateSimpleAnimationInOthers(string animation)
+        {
+            if (SimpleAnimations.Contains(animation))
+            {
+                if (_animationCoroutine != null)
+                {
+                    StopCoroutine(_animationCoroutine);
+                    _animationCoroutine = null;
+                }
+                
+                _currentAnimation = animation;
+                _animator.Play(_currentAnimation);
+                _animationCoroutine = StartCoroutine(ResetSimpleAnimation(_currentAnimation, () => {}));
+            }
+        }
+        
+        [PunRPC]
+        private void UpdateLoopedAnimationForOther(string animation)
+        {
+            if (LoopedAnimations.Contains(animation))
+            {
+                _animator.SetBool(animation, true);
+                _animator.Play(animation);
+            }
+        }
+
+        #endregion
     }
 }
