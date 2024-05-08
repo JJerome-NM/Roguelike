@@ -1,5 +1,4 @@
-﻿using DefaultNamespace;
-using FirstLevelScene;
+﻿using FirstLevelScene;
 using Levels;
 using Player;
 using TMPro;

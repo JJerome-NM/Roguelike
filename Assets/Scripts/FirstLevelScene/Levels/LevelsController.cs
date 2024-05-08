@@ -1,5 +1,4 @@
-﻿using DefaultNamespace;
-using FirstLevelScene;
+﻿using FirstLevelScene;
 using FirstLevelScene.Game;
 using UnityEngine;
 
@@ -11,8 +10,6 @@ namespace Levels
         [SerializeField] private float levelMultiplayer = 2f;
         [SerializeField] private int startLevel = 1;
         
-        // private float _levelMultiplayer;
-
         private int _currentLevel = 1;
         private float _currentMultiplayer;
         
@@ -23,7 +20,6 @@ namespace Levels
             
             LevelsEventManager.UpdateLevel(1);
             
-            GlobalEventManager.OnGameStarted.AddListener(OnGameStarted);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
         }
 
@@ -36,12 +32,6 @@ namespace Levels
                 LevelsEventManager.UpdateLevel(_currentLevel);
                 LevelsEventManager.UpdateLevelMultiplayer(_currentMultiplayer);
             }
-        }
-
-        private void OnGameStarted(GameStartState state)
-        {
-            // LevelsEventManager.UpdateLevel(_currentLevel);
-            // LevelsEventManager.UpdateLevelMultiplayer(_currentMultiplayer);
         }
     }
 }

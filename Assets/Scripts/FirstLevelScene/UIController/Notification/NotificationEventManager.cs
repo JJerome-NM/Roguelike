@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine.Events;
 
 namespace UIController
 {
-    public class NotificationEventManager
+    public static class NotificationEventManager
     {
         public static readonly UnityEvent<string> OnNotification = new();
 
