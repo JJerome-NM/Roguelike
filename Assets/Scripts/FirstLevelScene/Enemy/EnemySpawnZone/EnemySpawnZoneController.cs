@@ -23,10 +23,12 @@ namespace FirstLevelScene.Enemy.EnemySpawnZone
             
             if (PhotonNetwork.IsMasterClient)
             {
-                SpawnEnemies();
+                // SpawnEnemies();
             
                 LevelsEventManager.OnLevelMultiplayerUpdated.AddListener(OnLevelMultiplayerUpdated);
             }
+            
+            GlobalEventManager.OnGameStarted.AddListener((_) => SpawnEnemies());
         }
 
         private void OnLevelMultiplayerUpdated(float newMultiplayer)
@@ -41,7 +43,7 @@ namespace FirstLevelScene.Enemy.EnemySpawnZone
             });
             _spawnedEnemies.Clear();
             
-            SpawnEnemies();
+            // SpawnEnemies();
         }
         
         private void SpawnEnemies()

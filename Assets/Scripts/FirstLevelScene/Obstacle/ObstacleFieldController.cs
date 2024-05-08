@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FirstLevelScene.Game;
 using Obstacle;
 using Photon.Pun;
 using UnityEngine;
@@ -25,7 +26,13 @@ namespace FirstLevelScene.Obstacle
             _fieldPosition = grassTilemap.GetTilePositionWithType<TileBase>(grassTiles[0].GetType());
             _photonView = GetComponent<PhotonView>();
             
-            GlobalEventManager.OnGameStarted.AddListener((_) => GenerateBarriers());
+            GlobalEventManager.OnGameStarted.AddListener((state) =>
+            {
+                if (state != GameStartState.Resume)
+                {
+                    GenerateBarriers();
+                }
+            });
         }
 
         private void GenerateBarriers()

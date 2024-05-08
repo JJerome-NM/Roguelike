@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Linq;
-using DefaultNamespace;
 using FirstLevelScene;
 using FirstLevelScene.Game;
 using Levels;
@@ -47,20 +46,15 @@ namespace Enemy
             GlobalEventManager.OnGameStarted.AddListener(OnGameStart);
             GlobalEventManager.OnGameStopped.AddListener(OnGameStopped);
             LevelsEventManager.OnLevelMultiplayerUpdated.AddListener((multiplayer) => { damage += multiplayer; });
+            
+            StartSearch();
         }
 
         private void OnGameStart(GameStartState state)
         {
             StartSearch();
-            StartUpdateAnimation();
-        }
-
-        private void OnGameStopped(GameEndState state)
-        {
-            StopChase();
-            StopSearch();
-
-            if (state != GameEndState.Pause)
+            
+            if (state != GameStartState.Resume)
             {
                 _navAgent.SetDestination(_startPosition);
                 transform.position = _startPosition;
@@ -69,6 +63,12 @@ namespace Enemy
             {
                 _navAgent.SetDestination(transform.position);
             }
+        }
+
+        private void OnGameStopped(GameEndState state)
+        {
+            StopChase();
+            StopSearch();
         }
 
         private IEnumerator UpdateAnimations()
@@ -105,6 +105,7 @@ namespace Enemy
                     
                     StopSearch();
                     StartChase();
+                    yield break;
                 }
                 yield return new WaitForSeconds(searchDelay);
             }
@@ -135,9 +136,9 @@ namespace Enemy
                         _navAgent.SetDestination(_startPosition);
                         StopChase();
                         StartSearch();
+                        yield break;
                     }
                 }
-
                 yield return new WaitForSeconds(chaseDelay);
             }
         }
@@ -179,7 +180,7 @@ namespace Enemy
         private void StopChase() => StopMyCoroutine(ref _chaseCoroutine);
 
         private void StartSearch() => _searchCoroutine ??= StartCoroutine(SearchPlayer());
-
+        
         private void StopSearch() => StopMyCoroutine(ref _searchCoroutine);
 
         private void StopMyCoroutine(ref Coroutine coroutine)

@@ -80,10 +80,6 @@ namespace Player
         {
             if (state != GameStartState.Resume)
             {
-                SetLayerToCharacter();
-                gameObject.layer = _startLayer;
-                transform.position = _startPosition;
-                
                 _health = startHeals;
                 UpdateHealthText();
                 PlayerEventManager.OnPlayerHealsUpdated(_health);
@@ -101,6 +97,12 @@ namespace Player
         
         private void OnGameStopped(GameEndState state)
         {
+            if (state != GameEndState.Pause)
+            {
+                SetLayerToCharacter();
+                gameObject.layer = _startLayer;
+                transform.position = _startPosition;
+            }
         }
 
         private void Start()

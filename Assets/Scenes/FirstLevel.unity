@@ -17137,6 +17137,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemySpawnZone (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 2783016464750614690, guid: 69f15f913d15c5d428cdc7784d9158f7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4642713919333090804, guid: 69f15f913d15c5d428cdc7784d9158f7,
         type: 3}
       propertyPath: player
@@ -17485,6 +17490,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BrokenRune
+      objectReference: {fileID: 0}
+    - target: {fileID: 4232813034176760931, guid: 46e21f8f2997a99459a461fc47630d96,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -41883,6 +41893,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemySpawnZone (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2783016464750614690, guid: 69f15f913d15c5d428cdc7784d9158f7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4642713919333090804, guid: 69f15f913d15c5d428cdc7784d9158f7,
         type: 3}
       propertyPath: player
@@ -43283,6 +43298,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: EnemySpawnZone (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2783016464750614690, guid: 69f15f913d15c5d428cdc7784d9158f7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4642713919333090804, guid: 69f15f913d15c5d428cdc7784d9158f7,
         type: 3}
@@ -46638,6 +46658,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemySpawnZone
       objectReference: {fileID: 0}
+    - target: {fileID: 2783016464750614690, guid: 69f15f913d15c5d428cdc7784d9158f7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4642713919333090804, guid: 69f15f913d15c5d428cdc7784d9158f7,
         type: 3}
       propertyPath: player
@@ -47403,6 +47428,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: EnemySpawnZone
+      objectReference: {fileID: 0}
+    - target: {fileID: 2783016464750614690, guid: 69f15f913d15c5d428cdc7784d9158f7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4642713919333090804, guid: 69f15f913d15c5d428cdc7784d9158f7,
         type: 3}
