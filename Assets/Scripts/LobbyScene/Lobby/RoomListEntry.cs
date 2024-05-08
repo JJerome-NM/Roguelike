@@ -33,10 +33,7 @@ namespace LobbyScene.Lobby
         
         public void Initialize(RoomInfo roomInfo)
         {
-            Debug.Log(roomInfo.IsVisible);
-            
             _roomInfo = roomInfo;
-            
             roomName.SetText(roomInfo.Name);
             playersCount.SetText(string.Format(PlayersCountPatters, _roomInfo.PlayerCount, _roomInfo.MaxPlayers));
             closedText.gameObject.SetActive(!roomInfo.IsOpen);
